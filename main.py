@@ -47,6 +47,7 @@ def user(username):
             return render_template('user.html', username=username)
     return "User not found"
 
+
 @app.route('/')
 def home():
     if session.get('isLogged'):
@@ -73,6 +74,9 @@ def login():
                     session['isLogged'] = True
                     print(session['username'])
                     return redirect(url_for('home'))
+                else:
+                    flash('Incorrect password or username', 'error')
+                    return render_template('login.html')
     return render_template('login.html')
 
 
@@ -95,14 +99,20 @@ def post():
 def reg():
     if request.method == "POST":
         users = db.get('users')
-        users.append({'id': next_user_id(), 'username': request.form['username'], 'password': request.form['password']})
-        db.set('users', users)
-        db.dump()
-        session['isLogged'] = True
-        session['username'] = request.form['username']
-        return redirect('/')
+        # Check if the username is already taken
+        if 'username' in request.form and any(user.get('username') == request.form['username'] for user in users):
+            flash('Username is already taken. Please choose a different username.', 'error')
+            return redirect('/reg')  # Redirect to registration page with flash message
 
-    return render_template("reg.html")
+        else:
+            users.append({'id': next_user_id(), 'username': request.form['username'], 'password': request.form['password']})
+            db.set('users', users)
+            db.dump()
+            session['isLogged'] = True
+            session['username'] = request.form['username']
+            return redirect('/')
+    else:
+        return render_template('reg.html')
 
 
 @app.route("/create_post", methods=["POST"])
