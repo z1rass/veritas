@@ -1,29 +1,85 @@
 {% extends 'inlog_base.html' %}
 {% block body%}
- <div class="container mt-5">
+<div class="container mt-5">
     <div class="row">
-      <div class="col-md-4">
-        <!-- Блок с информацией о пользователе -->
-        <div class="card">
-          <img src="https://picsum.photos/500" class="card-img-top" alt="User Avatar">
-          <div class="card-body">
-            <h5 class="card-title">{{username}}</h5>
-            <p class="card-text">Описание пользователя или какая-то другая информация.</p>
-          </div>
+        <div class="col-md-4">
+            <!-- Блок с информацией о пользователе -->
+            <div class="card">
+                <img src="https://picsum.photos/500" class="card-img-top" alt="User Avatar">
+                <div class="card-body">
+                    <h5 class="card-title">{{username}}</h5>
+                    <p class="card-text">Описание пользователя или какая-то другая информация.</p>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="col-md-8">
-        <!-- Блок с дополнительной информацией или действиями пользователя -->
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Дополнительная информация</h5>
-            <p class="card-text">Дополнительные детали о пользователе, его действиях и т.д.</p>
-            <!-- Пример кнопки для какого-то действия -->
-            <a href="#" class="btn btn-primary">Выполнить действие</a>
-          </div>
+        <div class="col-md-8">
+            <!-- Блок с дополнительной информацией или действиями пользователя -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Дополнительная информация</h5>
+                    <p class="card-text">Дополнительные детали о пользователе, его действиях и т.д.</p>
+                    <!-- Пример кнопки для какого-то действия -->
+                    <!-- Кнопка для открытия модального окна -->
+                    <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Выполнить
+                        действие</a>
+                    <div class="reviews mt-4">
+                        <h4>Отзывы:</h4>
+                        {% for review in reviews | reverse %}
+                        <div class="card mt-2">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ review.title }}</h5>
+                                {% if review.text %}
+                                <p class="card-text">{{ review.text }}</p>
+                                {% endif %}
+                                {% if review.is_author_visible == True %}
+                                <p class="card-text"><small class="text-muted">Автор: {{ review.author }}</small></p>
+                                {% endif %}
+                                <p class="card-text"><small class="text-muted">Дата: {{ review.time }}</small></p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+
+                    <!-- Модальное окно -->
+                    <div class="modal" id="myModal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+
+                                <!-- Заголовок модального окна -->
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Заголовок формы</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+
+                                <!-- Тело модального окна -->
+                                <div class="modal-body">
+                                    <!-- Форма для ввода заголовка и текста -->
+                                    <form action="{{ url_for('user_review')}}" method="POST">
+                                        <div class="form-group">
+                                            <label for="title">Заголовок:</label>
+                                            <input type="text" name="title" class="form-control" id="title">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="text">text</label>
+                                            <textarea class="form-control" name="text" id="text"></textarea>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="show-author"
+                                                   name="show_author" value="true">
+                                            <label class="form-check-label" for="show-author">Показать автора</label>
+                                        </div>
+                                        <input type="hidden" name="username" value="{{ username }}">
+                                        <button type="submit" class="btn btn-primary">Отправить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 {% endblock %}

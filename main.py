@@ -12,6 +12,10 @@ if not db.exists('users'):
     db.set('counter_user_id', 0)
     db.dump()
 
+if not db.exists('users_reviews'):
+    db.set('users_reviews', {})
+    db.dump()
+
 if not db.get('counter_post_id'):
     db.set('counter_post_id', 1)
     db.dump()
@@ -31,6 +35,10 @@ def next_user_id():
     return counter
 
 
+now = datetime.now()
+formatted_now = now.strftime("%Y-%m-%d %H:%M")
+
+
 def set_info(title, text, username):
     post_id = next_post_id()
     now = datetime.now()
@@ -42,10 +50,16 @@ def set_info(title, text, username):
 
 @app.route('/user/<username>')
 def user(username):
-    for user in db.get('users'):
-        if user.get('username') == username:
-            return render_template('user.html', username=username)
-    return "User not found"
+    all_reviews = db.get('users_reviews').get(username, [])
+    print(all_reviews)
+
+    if username != session.get('username'):
+        for user in db.get('users'):
+            if user.get('username') == username:
+                return render_template('user.html', username=username, reviews=all_reviews)
+        return "User not found"
+    else:
+        return render_template('my_user_page.html', reviews=all_reviews)
 
 
 @app.route('/')
@@ -66,17 +80,25 @@ def login():
     if request.method == "POST":
         users_list = db.get('users')
         this_user = None
-        for user in users_list:
-            if request.form['username'] == user['username']:
-                this_user = user
-                if request.form['password'] == this_user['password']:
-                    session['username'] = request.form['username']
-                    session['isLogged'] = True
-                    print(session['username'])
-                    return redirect(url_for('home'))
-                else:
-                    flash('Incorrect password or username', 'error')
-                    return render_template('login.html')
+        input_username = request.form['username']
+
+        # Проверка существования пользователя
+        if any(user.get('username') == input_username for user in users_list):
+            # Поиск пользователя с введенным именем
+            this_user = next((user for user in users_list if user['username'] == input_username), None)
+
+            # Проверка пароля
+            if this_user and request.form['password'] == this_user['password']:
+                session['username'] = input_username
+                session['isLogged'] = True
+                print(session['username'])
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect password or username', 'error')
+                return render_template('login.html')
+        else:
+            flash('User does not exist', 'error')
+            return render_template('login.html')
     return render_template('login.html')
 
 
@@ -105,7 +127,8 @@ def reg():
             return redirect('/reg')  # Redirect to registration page with flash message
 
         else:
-            users.append({'id': next_user_id(), 'username': request.form['username'], 'password': request.form['password']})
+            users.append(
+                {'id': next_user_id(), 'username': request.form['username'], 'password': request.form['password']})
             db.set('users', users)
             db.dump()
             session['isLogged'] = True
@@ -121,12 +144,42 @@ def create_post():
         post_title = request.form['postTitle']
         post_text = request.form['postText']
         user_username = session.get('username')
-        set_info(post_title, post_text, user_username)
 
-        # Добавляем сообщение о публикации поста в объект запроса
-        flash('Beitrag veröffentlicht!', 'success')
+        if post_title:  # Проверка, что и заголовок, и текст существуют
+            set_info(post_title, post_text, user_username)
+            flash('Beitrag veröffentlicht!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Post title and text are required.', 'error')
+            return render_template('make_post.html')
 
-        return redirect(url_for('home'))
+@app.route('/user_review', methods=['POST'])
+def user_review():
+    users_reviews = db.get('users_reviews')
+
+    author = session.get('username')
+    username = request.form['username']
+    title = request.form['title']
+    text = request.form['text']
+    show_author = show_author = request.form.get('show_author', False) == 'true'
+    found = False
+
+
+
+    for k in users_reviews:
+        if k == username:
+            users_reviews[username].append({'title': title, 'text': text, 'author': author, 'likes': 0, 'dislikes': 0,
+                                            'is_author_visible': show_author, 'time': formatted_now})
+            found = True
+            break
+
+    if not found:
+        users_reviews[username] = [{'title': title, 'text': text, 'author': author, 'likes': 0, 'dislikes': 0,
+                                    'is_author_visible': show_author, 'time': formatted_now}]
+
+    db.set('users_reviews', users_reviews)
+
+    return redirect(url_for('user', username=username))
 
 
 app.run(debug=True)

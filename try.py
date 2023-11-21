@@ -1,11 +1,8 @@
-from flask import Flask, url_for, request
+users = {
+    'u1' : [{'title' : 'title'}]
 
-app = Flask(__name__)
+}
 
-
-@app.route('/<name>')
-def name(name):
-    return f"helllo {name}"
-
-app.run(debug=True)
-
+for i in users:
+    if i == 'u1':
+        users['u1'].append()

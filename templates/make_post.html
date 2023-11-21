@@ -5,15 +5,24 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <p class="alert alert-danger">{{message}}</p>
+                            {%endfor%}
+                        {% endif %}
+                    {% endwith %}
                     <h2 class="card-title text-center">Create Post</h2>
                     <form action="{{ url_for('create_post') }}" method="post">
                         <div class="form-group">
                             <label for="postTitle">Post Title</label>
-                            <input type="text" class="form-control" id="postTitle" name="postTitle" placeholder="Enter post title">
+                            <input type="text" class="form-control" id="postTitle" name="postTitle"
+                                   placeholder="Enter post title">
                         </div>
                         <div class="form-group">
                             <label for="postText">Post Text</label>
-                            <textarea class="form-control" id="postText" name="postText" rows="5" placeholder="Enter your post text"></textarea>
+                            <textarea class="form-control" id="postText" name="postText" rows="5"
+                                      placeholder="Enter your post text"></textarea>
                         </div>
                         <button type="submit" class="btn btn-dark btn-primary btn-block">Create Post</button>
                     </form>
