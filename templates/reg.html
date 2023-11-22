@@ -11,21 +11,21 @@
     {% endwith %}
     <form method="POST" action="reg">
         <div class="form-group">
-            <label for="username">Имя пользователя</label>
+            <label for="username">Usernmae: </label>
             <input type="text" class="form-control" id="username" name="username" required>
         </div>
         <div class="form-group">
-            <label for="password">Пароль</label>
+            <label for="password">Password</label>
             <div class="input-group">
                 <input type="password" class="form-control" id="password" name="password" required>
                 <div class="input-group-append">
                     <div class="input-group-text">
-                        <input type="checkbox" onclick="togglePassword()"> Показать пароль
+                        <input type="checkbox" onclick="togglePassword()"> Show password
                     </div>
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        <button type="submit" class="btn btn-primary">Registration</button>
     </form>
     <script>
         function togglePassword() {
