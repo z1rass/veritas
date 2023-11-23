@@ -50,7 +50,6 @@ def set_info(title, text, username):
 @app.route('/user/<username>')
 def user(username):
     all_reviews = db.get('users_reviews').get(username, [])
-    print(all_reviews)
 
     if username != session.get('username'):
         for user in db.get('users'):
@@ -90,7 +89,6 @@ def login():
             if this_user and request.form['password'] == this_user['password']:
                 session['username'] = input_username
                 session['isLogged'] = True
-                print(session['username'])
                 return redirect(url_for('home'))
             else:
                 flash('Incorrect password or username', 'error')
