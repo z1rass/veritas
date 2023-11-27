@@ -3,7 +3,6 @@ import pickledb
 from datetime import datetime
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = '120222008'
 
 db = pickledb.load('base.db', True)
 
