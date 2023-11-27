@@ -1,8 +1,13 @@
-users = {
-    'u1' : [{'title' : 'title'}]
+import pickledb
 
-}
+db = pickledb.load('try.db', True)
 
-for i in users:
-    if i == 'u1':
-        users['u1'].append()
+db.set('1', {'username': 'Matvii'})
+db.set('2', {'username': 'Joe'})
+
+keys = db.getall()
+
+for i in keys:
+    post = db.get(i)
+    if post['username'] == 'Matvii':
+        print(post["username"])

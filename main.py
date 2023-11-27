@@ -3,6 +3,7 @@ import pickledb
 from datetime import datetime
 
 app = Flask(__name__, static_folder='static')
+app.secret_key = '120222008'
 
 db = pickledb.load('base.db', True)
 
@@ -50,14 +51,33 @@ def set_info(title, text, username):
 @app.route('/user/<username>')
 def user(username):
     all_reviews = db.get('users_reviews').get(username, [])
-
     if username != session.get('username'):
         for user in db.get('users'):
             if user.get('username') == username:
-                return render_template('user.html', username=username, reviews=all_reviews)
+                posts = []
+                keys = db.getall()
+                for key in keys:
+                    post = db.get(key)
+                    try:
+                        if post['username'] == username:
+                            posts.append(post)
+                    except Exception:
+                        pass
+                return render_template('user.html', username=username, reviews=all_reviews, posts=posts)
+
         return "User not found"
     else:
-        return render_template('my_user_page.html', reviews=all_reviews)
+        posts = []
+        keys = db.getall()
+        for key in keys:
+            post = db.get(key)
+            try:
+                if post['username'] == username:
+                    posts.append(post)
+            except Exception:
+                pass
+        return render_template('my_user_page.html', reviews=all_reviews, posts=posts)
+
 
 
 @app.route('/')
